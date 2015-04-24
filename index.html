@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>$q</title>
+    <script src="angular.js"></script>
+    <script>
+        angular.module('myApp', []).controller('MyController', function ($scope, Github) {
+            Github.searchForNode().then(function (data) {
+                console.log(data);
+            }, function () {
+
+            });
+            $scope.message = 'Hello';
+        }).factory('Github', function (Interceptor, $q) {
+            return {
+                searchForNode: function () {
+                    return $q(function (resolve, reject) {
+                        Interceptor.makeAjaxCall('https://api.github.com/search/repositories?q=nodejs').then(function (config) {
+                            // strip all objects of the _id property and pass it along
+                            resolve(config.data);
+                        }, function () {
+                            reject();
+                        });
+                    });
+                }
+            };
+        }).factory('Interceptor', function ($http) {
+            return {
+                makeAjaxCall: function (url) {
+                    return $http.get(url);
+                }
+            }
+        });
+    </script>
+</head>
+<body>
+    <div ng-controller="MyController">
+        {{message}}
+    </div>
+</body>
+</html>
